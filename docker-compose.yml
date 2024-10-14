@@ -21,24 +21,40 @@ services:
     networks:
       - my_network
     depends_on:
-      - mongodb
+      - mongo
+      - mongo-express
       - redis
       - rabbitmq
 
-  mongodb:
+  mongo:
     image: mongo:8.0.1
     restart: always
-    container_name: mongodb
-    hostname: mongodb
+    container_name: mongo
+    hostname: mongo
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_ROOT_PASSWORD: example
     ports:
       - 27017:27017
     volumes:
       - mongo_data:/data/db
     networks:
       - my_network
+
+  mongo-express:
+    image: mongo-express:latest
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
+      ME_CONFIG_BASICAUTH: false
+    networks:
+      - my_network
+    depends_on:
+      - mongo
 
   redis:
     image: redis:7.4.1-alpine
@@ -48,6 +64,8 @@ services:
     volumes:
       - redis_data:/data
     command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    networks:
+      - my_network
 
   rabbitmq:
     image: rabbitmq:4-management
@@ -60,6 +78,8 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: user
       RABBITMQ_DEFAULT_PASS: password
+    networks:
+      - my_network
 
 volumes:
   redis_data:
