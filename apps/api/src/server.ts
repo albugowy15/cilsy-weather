@@ -2,9 +2,11 @@ import { json, urlencoded } from "body-parser";
 import express, { type Express } from "express";
 import morgan from "morgan";
 import cors from "cors";
+import authRouter from "./routes/auth";
 
 export const createServer = (): Express => {
   const app = express();
+
   app
     .disable("x-powered-by")
     .use(morgan("dev"))
@@ -16,7 +18,8 @@ export const createServer = (): Express => {
     })
     .get("/status", (_, res) => {
       return res.json({ ok: true });
-    });
+    })
+    .use(authRouter);
 
   return app;
 };
