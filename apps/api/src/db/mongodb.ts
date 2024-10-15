@@ -3,7 +3,8 @@ import mongoose from "mongoose";
 type MongoDB = typeof mongoose;
 async function connectMongoDB(mongoUrl: string) {
   try {
-    await mongoose.connect(mongoUrl);
+    const db = await mongoose.connect(mongoUrl);
+    return db;
   } catch (error) {
     console.error("cant connect to mongodb:", error);
     throw new Error("can't connect to mongodb");

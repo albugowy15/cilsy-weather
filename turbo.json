@@ -1,9 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": [".env"],
   "tasks": {
     "build": {
-      "env": ["MONGODB_URL"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "dependsOn": ["^build"],
       "outputs": ["build/**", "dist/**", ".next/**", "!.next/cache/**"]
@@ -19,8 +17,6 @@
       "dependsOn": ["^build"]
     },
     "dev": {
-      "env": ["MONGODB_URL"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "dependsOn": ["^build"],
       "cache": false,
       "persistent": true

@@ -3,7 +3,7 @@ import { MongoDB } from "../db/mongodb";
 import { User, IUser } from "../schemas/user-schema";
 
 type UserDocument =
-  | (Document<unknown, {}, IUser> &
+  | (Document<unknown, object, IUser> &
       IUser & {
         _id: Types.ObjectId;
       } & {

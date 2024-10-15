@@ -52,7 +52,7 @@ function setupAuthRoutes(db: MongoDB) {
       }
     },
   );
-  authRoutes.post("/auth/refresh", (req, res) => {});
+  authRoutes.post("/auth/refresh", () => {});
 
   return authRoutes;
 }

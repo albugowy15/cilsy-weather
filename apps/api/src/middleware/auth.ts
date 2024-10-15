@@ -19,7 +19,7 @@ export function authorize(req: Request, res: Response, next: NextFunction) {
     return;
   }
   const tokenValue = token[1];
-  jwt.verify(tokenValue, process.env.JWT_SECRET!, function (err, _) {
+  jwt.verify(tokenValue, process.env.JWT_SECRET!, function (err) {
     if (err) {
       res.status(403).json(errorRes(err.message));
       return;

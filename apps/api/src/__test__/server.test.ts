@@ -3,7 +3,7 @@ import { createServer } from "../server";
 
 describe("Server", () => {
   it("health check returns 200", async () => {
-    await supertest(createServer())
+    await supertest(await createServer())
       .get("/status")
       .expect(200)
       .then((res) => {
@@ -12,7 +12,7 @@ describe("Server", () => {
   });
 
   it("message endpoint says hello", async () => {
-    await supertest(createServer())
+    await supertest(await createServer())
       .get("/message/jared")
       .expect(200)
       .then((res) => {

@@ -10,14 +10,14 @@ export type ApiResponse<T, E> = {
   error?: E;
 };
 
-export function successRes<T>(data?: T): ApiResponse<T, any> {
+export function successRes<T>(data?: T): ApiResponse<T, unknown> {
   return {
     success: true,
     data,
   };
 }
 
-export function errorRes<E>(error?: E): ApiResponse<any, E> {
+export function errorRes<E>(error?: E): ApiResponse<unknown, E> {
   return {
     success: false,
     error,
