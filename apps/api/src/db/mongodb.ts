@@ -1,13 +1,16 @@
 import mongoose from "mongoose";
+import logger from "../util/logger";
+import { AppError } from "../util/error";
 
 type MongoDB = typeof mongoose;
 async function connectMongoDB(mongoUrl: string) {
   try {
     const db = await mongoose.connect(mongoUrl);
+    logger.info("connected to database");
     return db;
   } catch (error) {
-    console.error("cant connect to mongodb:", error);
-    throw new Error("can't connect to mongodb");
+    logger.error("cant connect to mongodb:", error);
+    throw new AppError(500, "can't connect to mongodb");
   }
 }
 

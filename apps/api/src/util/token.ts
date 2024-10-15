@@ -5,14 +5,16 @@ export type TokenPayload = {
   id: string;
 };
 
-export function createJWTToken(payload: TokenPayload, expires: string) {
-  const secret = process.env.JWT_SECRET!;
+export function createJWTToken(
+  payload: TokenPayload,
+  secret: string,
+  expires: string | number | undefined,
+) {
   const token = jwt.sign(payload, secret, { expiresIn: expires });
   return token;
 }
 
-export function verifyJWTToken(token: string) {
-  const secret = process.env.JWT_SECRET!;
+export function verifyJWTToken(token: string, secret: string) {
   const decodedToken = jwt.verify(token, secret);
-  return decodedToken as TokenPayload;
+  return decodedToken;
 }

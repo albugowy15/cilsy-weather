@@ -1,20 +1,10 @@
-import { Document, Types } from "mongoose";
 import { MongoDB } from "../db/mongodb";
-import { User, IUser } from "../schemas/user-schema";
-
-type UserDocument =
-  | (Document<unknown, object, IUser> &
-      IUser & {
-        _id: Types.ObjectId;
-      } & {
-        __v?: number;
-      })
-  | null;
+import { User, UserDocument, UserModel } from "../schemas/user-schema";
 
 interface UserRepository {
   findOneById(userID: string): Promise<UserDocument | null>;
   findOneByEmail(email: string): Promise<UserDocument | null>;
-  create(data: IUser): Promise<IUser>;
+  create(data: UserModel): Promise<UserModel>;
 }
 
 class UserRepositoryImpl implements UserRepository {
@@ -31,7 +21,7 @@ class UserRepositoryImpl implements UserRepository {
     const user = await User.findOne({ email: email });
     return user;
   }
-  async create(data: IUser) {
+  async create(data: UserModel) {
     return await User.create(data);
   }
 }
