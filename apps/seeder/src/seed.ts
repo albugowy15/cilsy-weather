@@ -1,38 +1,72 @@
 import countries from "./countries.json";
 import "dotenv/config";
-import { connect, HydratedDocument, model, Schema } from "mongoose";
+import { connect, model, Schema } from "mongoose";
+import bcrypt from "bcryptjs";
 
-// region: repository
-export interface CountryModel {
+interface CountryModel {
   name: string;
-  alpha_2: string;
-  alpha_3: string;
+  code: string;
 }
-export const countrySchema = new Schema<CountryModel>({
+const countrySchema = new Schema<CountryModel>({
   name: { type: String, required: true },
-  alpha_2: { type: String, required: true },
-  alpha_3: { type: String, required: true },
+  code: { type: String, required: true },
 });
-export const Country = model<CountryModel>("countries", countrySchema);
-export type CountryDocument = HydratedDocument<CountryModel>;
-// endregion
+const Country = model<CountryModel>("countries", countrySchema);
+
+interface UserModel {
+  fullname: string;
+  email: string;
+  password: string;
+}
+const userSchema = new Schema<UserModel>({
+  fullname: { type: String, required: true },
+  email: { type: String, required: true },
+  password: { type: String, required: true },
+});
+const User = model<UserModel>("users", userSchema);
+
+const users: UserModel[] = [
+  {
+    fullname: "usertest 1",
+    email: "usertest1@gmal.com",
+    password: "usertest1password",
+  },
+  {
+    fullname: "usertest 2",
+    email: "usertest2@gmal.com",
+    password: "usertest2password",
+  },
+];
 
 async function seedMongoDB() {
   await connect(process.env.MONGODB_URL!);
   console.log("success connect to mongodb");
-  const data = countries.data;
 
-  data.forEach((item) => {
+  // seed countries
+  console.log("seed countries");
+  countries.data.forEach(async (item) => {
     console.log("Inserting: ", item);
-    Country.create({
-      name: item.name,
-      alpha_2: item.alpha2,
-      alpha_3: item.alpha3,
-    }).catch((err) => {
-      console.error(err);
-      process.exit(1);
+    await Country.create({
+      name: item.name.trim(),
+      code: item.alpha2.trim(),
     });
   });
+
+  console.log("seed users");
+  users.forEach(async (item) => {
+    console.log("Inserting: ", item);
+    const hashedPassword = await bcrypt.hash(item.password, 12);
+    await User.create({
+      fullname: item.fullname,
+      password: hashedPassword,
+      email: item.email,
+    });
+  });
+
+  const insertedCountries = await Country.find();
+  console.log(insertedCountries);
+  const insertedUsers = await User.find();
+  console.log(insertedUsers);
 }
 seedMongoDB()
   .then(() => {
