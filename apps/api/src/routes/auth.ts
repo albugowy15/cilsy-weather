@@ -11,13 +11,12 @@ import {
 } from "../schemas/auth-schema";
 import { zodValidation } from "../middleware/zod-validator";
 import { successRes } from "../util/http";
-import { MongoDB } from "../db/mongodb";
+import { Config } from "../util/config";
 
-function setupAuthRoutes(db: MongoDB) {
+function setupAuthRoutes(config: Config) {
   const authRoutes: RouterType = Router();
-  const userRepository = new UserRepositoryImpl(db);
+  const userRepository = new UserRepositoryImpl();
   const authUseCase = new AuthUseCaseImpl(userRepository);
-  const secret = process.env.JWT_SECRET!;
 
   authRoutes.post(
     "/auth/signup",
@@ -31,14 +30,17 @@ function setupAuthRoutes(db: MongoDB) {
     "/auth/signin",
     zodValidation(signInSchema),
     async (req: SignInRequest, res: Response) => {
-      const result = await authUseCase.signIn(req.body, secret);
+      const result = await authUseCase.signIn(req.body, config.JWT_SECRET);
       res.status(200).json(successRes(result));
     },
   );
   authRoutes.post(
     "/auth/refresh",
     async (req: RefreshTokenRequest, res: Response) => {
-      const result = await authUseCase.refreshToken(req.body, secret);
+      const result = await authUseCase.refreshToken(
+        req.body,
+        config.JWT_SECRET,
+      );
       res.status(200).json(successRes(result));
     },
   );

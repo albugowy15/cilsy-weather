@@ -6,6 +6,10 @@
       "dependsOn": ["^build"],
       "outputs": ["build/**", "dist/**", ".next/**", "!.next/cache/**"]
     },
+    "seed": {
+      "dependsOn": [],
+      "cache": false
+    },
     "test": {
       "outputs": ["coverage/**"],
       "dependsOn": []

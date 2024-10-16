@@ -1,12 +1,16 @@
-import { MongoDB } from "../db/mongodb";
 import express, { Router } from "express";
 import { authorize } from "../middleware/auth";
+import { zodValidation } from "../middleware/zod-validator";
+import { saveLocationSchema } from "../schemas/location-schema";
+import { Config } from "../util/config";
 
-export function setupLocationRoutes(db: MongoDB): Router {
+export function setupLocationRoutes(config: Config): Router {
   const routes = express.Router();
-  const secret = process.env.JWT_SECRET!;
-  routes.get("/locations", authorize(secret), (req, res) => {
-    res.send("authenticated");
-  });
+
+  routes
+    .use(authorize(config.JWT_SECRET))
+    .post("/locations", zodValidation(saveLocationSchema), (req, res) => {
+      res.send("authenticated");
+    });
   return routes;
 }

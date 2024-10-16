@@ -1,5 +1,5 @@
 import { createServer } from "./server";
-import "dotenv/config";
+// import "dotenv/config";
 import logger from "./util/logger";
 
 const port = process.env.PORT || 5001;

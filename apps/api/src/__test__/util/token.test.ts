@@ -1,4 +1,4 @@
-import { createJWTToken, TokenPayload, verifyJWTToken } from "../util/token";
+import { createJWTToken, TokenPayload, verifyJWTToken } from "../../util/token";
 
 describe("Test jwt", () => {
   it("check sign and verify", () => {

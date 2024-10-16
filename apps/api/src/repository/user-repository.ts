@@ -1,4 +1,3 @@
-import { MongoDB } from "../db/mongodb";
 import { User, UserDocument, UserModel } from "../schemas/user-schema";
 
 interface UserRepository {
@@ -8,11 +7,6 @@ interface UserRepository {
 }
 
 class UserRepositoryImpl implements UserRepository {
-  db: MongoDB;
-  constructor(db: MongoDB) {
-    this.db = db;
-  }
-
   async findOneById(userID: string): Promise<UserDocument | null> {
     const user = await User.findById(userID);
     return user;

@@ -1,12 +1,12 @@
 import express, { type Router } from "express";
 import setupAuthRoutes from "./auth";
-import { MongoDB } from "../db/mongodb";
 import { setupLocationRoutes } from "./location";
+import { Config } from "../util/config";
 
-function setupRoutes(db: MongoDB) {
+function setupRoutes(config: Config) {
   const routes: Router = express.Router();
-  const authRoutes = setupAuthRoutes(db);
-  const locationRoutes = setupLocationRoutes(db);
+  const authRoutes = setupAuthRoutes(config);
+  const locationRoutes = setupLocationRoutes(config);
 
   routes.use("/v1", authRoutes, locationRoutes);
   return routes;

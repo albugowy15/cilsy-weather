@@ -7,16 +7,18 @@ import { appErrorHandler } from "./util/error";
 import morgan from "morgan";
 import compression from "compression";
 import timeout from "connect-timeout";
-import logger from "./util/logger";
+// import logger from "./util/logger";
+import { loadEnvConfig } from "./util/config";
 
 export const createServer = async (): Promise<Express> => {
   const app = express();
-  const mongoUrl = process.env.MONGODB_URL;
-  if (!mongoUrl) {
-    logger.error("MONGODB_URL environment is empty");
-  }
-  const db = await connectMongoDB(mongoUrl!);
-  const routes = setupRoutes(db);
+  // const mongoUrl = process.env.MONGODB_URL;
+  // if (!mongoUrl) {
+  //   logger.error("MONGODB_URL environment is empty");
+  // }
+  const config = loadEnvConfig();
+  await connectMongoDB(config.MONGODB_URL);
+  const routes = setupRoutes(config);
 
   app
     .use(compression())
