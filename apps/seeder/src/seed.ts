@@ -28,12 +28,12 @@ const User = model<UserModel>("users", userSchema);
 const users: UserModel[] = [
   {
     fullname: "usertest 1",
-    email: "usertest1@gmal.com",
+    email: "usertest1@gmail.com",
     password: "usertest1password",
   },
   {
     fullname: "usertest 2",
-    email: "usertest2@gmal.com",
+    email: "usertest2@gmail.com",
     password: "usertest2password",
   },
 ];
@@ -52,6 +52,7 @@ async function seedMongoDB() {
     });
   });
 
+  // seed users
   console.log("seed users");
   users.forEach(async (item) => {
     console.log("Inserting: ", item);
