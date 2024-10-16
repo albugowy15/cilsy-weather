@@ -13,6 +13,7 @@ interface LocationRepository {
   findOne(
     params: RootFilterQuery<LocationModel>,
   ): Promise<LocationDocument | null>;
+  deleteOne(filter?: RootFilterQuery<LocationModel>): Promise<void>;
 }
 
 class LocationRepositoryImpl implements LocationRepository {
@@ -28,6 +29,9 @@ class LocationRepositoryImpl implements LocationRepository {
     params: RootFilterQuery<LocationModel>,
   ): Promise<LocationDocument | null> {
     return await Location.findOne(params);
+  }
+  async deleteOne(params: RootFilterQuery<LocationModel>): Promise<void> {
+    await Location.deleteOne(params);
   }
 }
 
