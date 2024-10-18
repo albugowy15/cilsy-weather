@@ -1,6 +1,7 @@
 import { type Request, type Response, type NextFunction } from "express";
 import { errorRes } from "./http";
 import logger from "./logger";
+import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 
 class AppError extends Error {
   message: string;
@@ -24,6 +25,12 @@ export function appErrorHandler(
   let errMessage = "Internal server error";
   if (err instanceof AppError) {
     errCode = err.code;
+    errMessage = err.message;
+  } else if (
+    err instanceof JsonWebTokenError ||
+    err instanceof TokenExpiredError
+  ) {
+    errCode = 403;
     errMessage = err.message;
   }
   logger.error(err.message);
