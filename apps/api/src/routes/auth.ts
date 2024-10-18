@@ -1,4 +1,4 @@
-import type { Router as RouterType, Response } from "express";
+import type { Router as RouterType, Response, NextFunction } from "express";
 import { Router } from "express";
 import { UserRepositoryImpl } from "../repository/user-repository";
 import { AuthUseCaseImpl } from "../usecase/auth-usecase";
@@ -21,27 +21,36 @@ function setupAuthRoutes(config: Config) {
   authRoutes.post(
     "/auth/signup",
     zodValidation(signUpSchema),
-    (req: SignUpRequest, res: Response) => {
-      authUseCase.signUp(req.body).then(() => {
-        res.status(201).json(successRes());
-      });
+    (req: SignUpRequest, res: Response, next: NextFunction) => {
+      authUseCase
+        .signUp(req.body)
+        .then(() => {
+          res.status(201).json(successRes());
+        })
+        .catch((err) => next(err));
     },
   );
   authRoutes.post(
     "/auth/signin",
     zodValidation(signInSchema),
-    (req: SignInRequest, res: Response) => {
-      authUseCase.signIn(req.body, config.JWT_SECRET).then((result) => {
-        res.status(200).json(successRes(result));
-      });
+    (req: SignInRequest, res: Response, next: NextFunction) => {
+      authUseCase
+        .signIn(req.body, config.JWT_SECRET)
+        .then((result) => {
+          res.status(200).json(successRes(result));
+        })
+        .catch((err) => next(err));
     },
   );
   authRoutes.post(
     "/auth/refresh",
-    (req: RefreshTokenRequest, res: Response) => {
-      authUseCase.refreshToken(req.body, config.JWT_SECRET).then((result) => {
-        res.status(200).json(successRes(result));
-      });
+    (req: RefreshTokenRequest, res: Response, next: NextFunction) => {
+      authUseCase
+        .refreshToken(req.body, config.JWT_SECRET)
+        .then((result) => {
+          res.status(200).json(successRes(result));
+        })
+        .catch((err) => next(err));
     },
   );
 

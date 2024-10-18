@@ -4,7 +4,6 @@
   "private": true,
   "scripts": {
     "start": "node dist/seed.js",
-    "dev": "tsup --watch --onSuccess \"node dist/seed.js\"",
     "build": "tsup",
     "lint": "eslint src",
     "clean": "rm -rf dist",

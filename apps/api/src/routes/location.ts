@@ -1,4 +1,9 @@
-import express, { type Request, type Response, type Router } from "express";
+import express, {
+  NextFunction,
+  type Request,
+  type Response,
+  type Router,
+} from "express";
 import { zodValidation } from "../middleware/zod-validator";
 import { LocationRepositoryImpl } from "../repository/location-repository";
 import {
@@ -22,32 +27,48 @@ export function setupLocationRoutes(config: Config): Router {
   routes.post(
     "/locations",
     zodValidation(saveLocationSchema),
-    (req: SaveLocationRequest, res: Response) => {
+    (req: SaveLocationRequest, res: Response, next: NextFunction) => {
       const token = getTokenFromHeader(req);
       const payload = verifyJWTToken(token, config.JWT_SECRET) as TokenPayload;
-      locationUseCase.save(req.body, payload.id).then(() => {
-        res.status(201).json(successRes());
-      });
+      locationUseCase
+        .save(req.body, payload.id)
+        .then(() => {
+          res.status(201).json(successRes());
+        })
+        .catch((err) => next(err));
     },
   );
-  routes.get("/locations", (req: Request, res: Response) => {
-    const token = getTokenFromHeader(req);
-    const payload = verifyJWTToken(token, config.JWT_SECRET) as TokenPayload;
-    locationUseCase.findAll(payload.id).then((result) => {
-      res.status(200).json(successRes(result));
-    });
-  });
-  routes.delete("/locations/:locationId", (req: Request, res: Response) => {
-    const paramLocationId = req.params.locationId;
-    if (paramLocationId.length == 0) {
-      res.status(400).json(errorRes("locationId params is required"));
-      return;
-    }
-    const token = getTokenFromHeader(req);
-    const payload = verifyJWTToken(token, config.JWT_SECRET) as TokenPayload;
-    locationUseCase.delete(paramLocationId, payload.id).then(() => {
-      res.status(200).json(successRes());
-    });
-  });
+  routes.get(
+    "/locations",
+    (req: Request, res: Response, next: NextFunction) => {
+      const token = getTokenFromHeader(req);
+      const payload = verifyJWTToken(token, config.JWT_SECRET) as TokenPayload;
+      locationUseCase
+        .findAll(payload.id)
+        .then((result) => {
+          res.status(200).json(successRes(result));
+        })
+        .catch((err) => next(err));
+    },
+  );
+  routes.delete(
+    "/locations/:locationId",
+    (req: Request, res: Response, next: NextFunction) => {
+      const paramLocationId = req.params.locationId;
+      if (paramLocationId.length == 0) {
+        res.status(400).json(errorRes("locationId params is required"));
+        return;
+      }
+      const token = getTokenFromHeader(req);
+      const payload = verifyJWTToken(token, config.JWT_SECRET) as TokenPayload;
+      locationUseCase
+        .delete(paramLocationId, payload.id)
+        .then(() => {
+          res.status(200).json(successRes());
+        })
+        .catch((err) => next(err));
+    },
+  );
+
   return routes;
 }
