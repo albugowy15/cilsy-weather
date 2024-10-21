@@ -9,13 +9,16 @@ import { persist } from "zustand/middleware";
 type AuthState = {
   accessToken: string;
   refreshToken: string;
+  // eslint-disable-next-line no-unused-vars
   updateAccessToken: (accessToken: AuthState["accessToken"]) => void;
+  // eslint-disable-next-line no-unused-vars
   updateRefreshToken: (refreshToken: AuthState["refreshToken"]) => void;
 };
 
 const useAuthStore = create<AuthState>()(
   persist(
-    (set, get) => ({
+    // eslint-disable-next-line no-unused-vars
+    (set, _get) => ({
       accessToken: "",
       refreshToken: "",
       updateAccessToken(accessToken) {
@@ -46,9 +49,11 @@ const useSession = () => {
 };
 
 type UseSignInOpts = {
+  // eslint-disable-next-line no-unused-vars
   onError?: ((error: Error) => Promise<unknown> | unknown) | undefined;
   onSuccess?:
     | ((
+        // eslint-disable-next-line no-unused-vars
         data: WeatherApiResponse<{
           access_token: string;
           refresh_token: string;

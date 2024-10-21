@@ -11,14 +11,42 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useSession } from "@/lib/auth";
-import { Cloud, LayoutDashboard, LogOut, User } from "lucide-react";
+import { LayoutDashboard, LogOut, Moon, Sun, User } from "lucide-react";
+import { useTheme } from "next-themes";
 import Link from "next/link";
 import * as React from "react";
 
+export function ModeToggle() {
+  const { setTheme } = useTheme();
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="icon">
+          <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          <span className="sr-only">Toggle theme</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => setTheme("light")}>
+          Light
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("dark")}>
+          Dark
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("system")}>
+          System
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 export const Navigations = () => {
   const session = useSession();
   return (
     <nav className="ml-auto flex gap-2 items-center">
+      <ModeToggle />
       {session.isAuthenticated ? (
         <>
           <DropdownMenu>
@@ -64,9 +92,3 @@ export const Navigations = () => {
     </nav>
   );
 };
-
-const MainLayout = ({ children }: { children: React.ReactNode }) => {
-  return <></>;
-};
-
-export { MainLayout };

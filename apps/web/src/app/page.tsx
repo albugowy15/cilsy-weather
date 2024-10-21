@@ -47,20 +47,20 @@ const HeroSection = () => {
 
 const FeaturesSection = () => {
   return (
-    <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-100 dark:bg-gray-800">
+    <section className="w-full py-12 md:py-24 lg:py-32">
       <div className="container px-4 md:px-6">
         <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12">
           Key Features
         </h2>
         <div className="grid gap-6 lg:grid-cols-3">
-          <div className="flex flex-col items-center space-y-4 bg-white p-6 rounded-lg shadow-md">
+          <div className="flex flex-col items-center space-y-4 bg-secondary text-seconday-foreground p-6 rounded-lg shadow-md">
             <ThermometerSun className="h-12 w-12 text-blue-500" />
             <h3 className="text-xl font-bold">Accurate Forecasts</h3>
             <p className="text-gray-500 text-center">
               Get precise weather predictions for any location worldwide.
             </p>
           </div>
-          <div className="flex flex-col items-center space-y-4 bg-white p-6 rounded-lg shadow-md">
+          <div className="flex flex-col items-center space-y-4 bg-secondary text-seconday-foreground p-6 rounded-lg shadow-md">
             <Droplets className="h-12 w-12 text-blue-500" />
             <h3 className="text-xl font-bold">Precipitation Alerts</h3>
             <p className="text-gray-500 text-center">
@@ -68,7 +68,7 @@ const FeaturesSection = () => {
               precipitation.
             </p>
           </div>
-          <div className="flex flex-col items-center space-y-4 bg-white p-6 rounded-lg shadow-md">
+          <div className="flex flex-col items-center space-y-4 bg-secondary text-seconday-foreground p-6 rounded-lg shadow-md">
             <Wind className="h-12 w-12 text-blue-500" />
             <h3 className="text-xl font-bold">Wind Conditions</h3>
             <p className="text-gray-500 text-center">
@@ -87,6 +87,7 @@ export default function HomePage() {
     <main className="flex-1">
       <HeroSection />
       <FeaturesSection />
+      <div className="mb-20" />
     </main>
   );
 }

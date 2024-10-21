@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit --incremental false"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -34,10 +35,10 @@
     "next": "14.2.15",
     "next-themes": "^0.3.0",
     "react": "18.3.1",
-    "react-beautiful-dnd": "^13.1.1",
     "react-dom": "18.3.1",
     "react-hook-form": "^7.53.0",
     "recharts": "^2.13.0",
+    "sharp": "^0.33.5",
     "sonner": "^1.5.0",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
@@ -50,7 +51,6 @@
     "@tanstack/react-query-devtools": "^5.59.15",
     "@types/node": "^20.16.11",
     "@types/react": "^18.3.11",
-    "@types/react-beautiful-dnd": "^13.1.8",
     "@types/react-dom": "^18.3.1",
     "autoprefixer": "^10.4.20",
     "eslint": "^8.57.1",

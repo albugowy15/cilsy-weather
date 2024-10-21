@@ -11,7 +11,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { protectedFetch } from "@/lib/api";
 import { getQueryClient } from "@/providers/react-query";
 import { useMutation } from "@tanstack/react-query";
@@ -45,7 +45,7 @@ export function DeleteLocationAlert(props: DeleteLocationAlertProps) {
       <AlertDialogTrigger asChild>
         <Button
           disabled={deleteLocationMutation.isPending}
-          variant="outline"
+          variant="destructive"
           size="sm"
         >
           <Trash2 className="w-4 h-4 mr-2" />
@@ -63,6 +63,7 @@ export function DeleteLocationAlert(props: DeleteLocationAlertProps) {
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
+            className={buttonVariants({ variant: "destructive" })}
             onClick={() => deleteLocationMutation.mutate(props.locationId)}
           >
             Delete

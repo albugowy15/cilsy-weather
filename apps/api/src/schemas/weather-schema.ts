@@ -39,14 +39,6 @@ interface BaseWeatherCondition {
   wind_deg: number;
   weather: WeatherDetails[];
 }
-const baseWeatherConditionSchema = new Schema<BaseWeatherCondition>({
-  dt: { type: Number, required: true },
-  pressure: { type: Number, required: true },
-  humidity: { type: Number, required: true },
-  wind_speed: { type: Number, required: true },
-  wind_deg: { type: Number, required: true },
-  weather: { type: [weatherDetailsSchema], required: true },
-});
 
 interface CurrentWeather extends BaseWeatherCondition {
   temp: number;

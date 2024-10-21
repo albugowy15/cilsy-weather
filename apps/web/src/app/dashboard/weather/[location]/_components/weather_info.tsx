@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Card } from "@/components/ui/card";
-import { BarChart, YAxis, CartesianGrid, Bar } from "recharts";
+import { BarChart, YAxis, Bar, Label } from "recharts";
 import {
   ChartConfig,
   ChartContainer,
@@ -11,7 +11,14 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { CloudSun, Droplets, Wind, Gauge, RefreshCw } from "lucide-react";
+import {
+  CloudSun,
+  Droplets,
+  Wind,
+  Gauge,
+  RefreshCw,
+  Loader2,
+} from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { protectedFetch } from "@/lib/api";
 import { WeatherResponseData } from "../types";
@@ -124,10 +131,10 @@ export default function WeatherInfo(props: WeatherInfoProps) {
   return (
     <>
       <section>
-        <div className="flex justify-between">
+        <div className="flex flex-col md:flex-row justify-between">
           <div>
-            <h2 className="font-bold text-2xl">Current Weather</h2>
-            <p className="mb-3">
+            <h2 className="font-bold text-xl md:text-2xl">Current Weather</h2>
+            <p className="mb-3 text-md">
               Updated at:{" "}
               {convertTimestampToString(
                 current.dt,
@@ -136,25 +143,42 @@ export default function WeatherInfo(props: WeatherInfoProps) {
             </p>
           </div>
           <Button
+            disabled={
+              refreshWeatherMutation.isPending ||
+              weatherQuery.isLoading ||
+              weatherQuery.isRefetching
+            }
             onClick={() => refreshWeatherMutation.mutate(props.location.id)}
           >
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Refresh
+            {refreshWeatherMutation.isPending ||
+            weatherQuery.isLoading ||
+            weatherQuery.isRefetching ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Refreshing...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Refresh
+              </>
+            )}
           </Button>
         </div>
-        <div className="flex gap-4">
+        <div className="flex flex-col md:flex-row gap-4 mt-6 md:mt-0">
           <Card className="flex flex-col items-center justify-center flex-1 p-5">
             <div className="flex items-center justify-center">
               <img
+                loading="eager"
                 src={getWeatherIcon(current.weather[0].icon)}
                 alt={current.weather[0].description}
                 className="w-24 h-24"
               />
               <div className="ml-4">
-                <h2 className="text-4xl font-bold">
-                  {formatTemperature(current.feels_like)}
+                <h2 className="text-3xl md:text-4xl font-bold">
+                  {formatTemperature(current.temp)}
                 </h2>
-                <p className="text-xl capitalize">
+                <p className="text-lg md:text-xl capitalize">
                   {current.weather[0].description}
                 </p>
               </div>
@@ -172,7 +196,7 @@ export default function WeatherInfo(props: WeatherInfoProps) {
               ))}
             </div>
           </Card>
-          <Card className="flex-1 grid grid-cols-2 gap-1 p-5">
+          <Card className="flex-1 grid grid-cols-1 md:grid-cols-2 md:gap-1 gap-4 p-5">
             <div className="flex items-center">
               <Droplets className="w-6 h-6 mr-2" />
               <span>Humidity: {current.humidity}%</span>
@@ -188,7 +212,8 @@ export default function WeatherInfo(props: WeatherInfoProps) {
             <div className="flex items-center">
               <CloudSun className="w-6 h-6 mr-2" />
               <span>
-                Feels like: {convertTemperature(current.temp, tempUnit)}°
+                Feels like:{" "}
+                {convertTemperature(current.temp, tempUnit).toFixed(2)}°
                 {tempUnit}
               </span>
             </div>
@@ -196,17 +221,24 @@ export default function WeatherInfo(props: WeatherInfoProps) {
         </div>
       </section>
       <section className="mt-8">
-        <h2 className="font-bold text-2xl mb-3">Forecast Day Temperature</h2>
+        <h2 className="font-bold text-xl md:text-2xl mb-3">
+          Forecast Day Temperature
+        </h2>
         <div className="flex flex-col gap-3">
           <div className="flex flex-col">
             <ChartContainer
               config={chartConfig}
-              className="min-h-[200px] h-[400px] w-full px-8"
+              className="min-h-[200px] h-[200px] md:h-[400px] w-full"
             >
               <BarChart accessibilityLayer data={formattedDailyData}>
-                <CartesianGrid vertical={false} />
-                {/* <XAxis dataKey="date" /> */}
-                <YAxis />
+                <YAxis fontSize={12}>
+                  <Label
+                    position={"insideLeft"}
+                    offset={15}
+                    value={"Temp"}
+                    angle={-90}
+                  />
+                </YAxis>
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <ChartLegend content={<ChartLegendContent />} />
                 <Bar dataKey={"temp"} radius={4} fill="var(--color-temp)" />
@@ -220,8 +252,8 @@ export default function WeatherInfo(props: WeatherInfoProps) {
           </div>
         </div>
       </section>
-      <section className="mt-8">
-        <h2 className="font-bold text-2xl">Forecast Weather</h2>
+      <section className="mt-8 mb-20">
+        <h2 className="font-bold text-xl md:text-2xl">Forecast Weather</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4 mt-4">
           {formattedDailyData.map((day, index) => (
             <Card key={index} className="p-2 text-center">

@@ -29,7 +29,7 @@ export const createServer = async (): Promise<Express> => {
     .use("/v1", authRoutes)
     .use("/v1", authorize(config.JWT_SECRET), locationRoutes)
     .use(appErrorHandler)
-    .use((req, res) => {
+    .use((_req, res) => {
       res.status(404).json(errorRes("Route or method not found"));
     });
 

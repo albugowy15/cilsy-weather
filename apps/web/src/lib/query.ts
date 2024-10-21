@@ -8,6 +8,7 @@ interface ToastMutationOption {
   method?: "POST" | "PUT" | "PATCH" | "DELETE";
   onSuccess?: () => void;
   success?: string;
+  // eslint-disable-next-line no-unused-vars
   onError?: (error: Error) => void;
 }
 
