@@ -1,5 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
   "tasks": {
     "build": {
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
@@ -7,8 +8,7 @@
       "outputs": ["build/**", "dist/**", ".next/**", "!.next/cache/**"]
     },
     "seed": {
-      "dependsOn": [],
-      "cache": false
+      "dependsOn": []
     },
     "test": {
       "outputs": ["coverage/**"],

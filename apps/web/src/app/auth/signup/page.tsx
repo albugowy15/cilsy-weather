@@ -1,12 +1,11 @@
-import * as React from "react";
 import { Card } from "@/components/ui/card";
-import { SignInForm } from "./_components/signin-form";
+import { SignUpForm } from "./_components/signup-form";
 
-export default function SignInPage() {
+export default function SignUpPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
       <Card className="w-full max-w-sm">
-        <SignInForm />
+        <SignUpForm />
       </Card>
     </div>
   );

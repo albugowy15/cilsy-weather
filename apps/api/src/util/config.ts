@@ -5,7 +5,9 @@ import logger from "./logger";
 const configSchema = z.object({
   MONGODB_URL: z.string(),
   JWT_SECRET: z.string(),
-  OPENWEATHER_API_KEY: z.string(),
+  OPENWEATHERMAP_BASEURL: z.string(),
+  OPENWEATHERMAP_APPID: z.string(),
+  OPENWEATHERMAP_GEO_BASEURL: z.string(),
 });
 
 export type Config = z.infer<typeof configSchema>;

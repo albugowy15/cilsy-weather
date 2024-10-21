@@ -4,6 +4,7 @@ import {
   LocationDocument,
   LocationModel,
 } from "../schemas/location-schema";
+import { Weather } from "../schemas/weather-schema";
 
 interface LocationRepository {
   find(
@@ -31,7 +32,10 @@ class LocationRepositoryImpl implements LocationRepository {
     return await Location.findOne(params);
   }
   async deleteOne(params: RootFilterQuery<LocationModel>): Promise<void> {
-    await Location.deleteOne(params);
+    const deletedLocation = await Location.findOneAndDelete(params);
+    if (deletedLocation) {
+      await Weather.deleteOne({ location_id: deletedLocation._id });
+    }
   }
 }
 

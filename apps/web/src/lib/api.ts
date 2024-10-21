@@ -1,9 +1,8 @@
 "use client";
 
-import { useAuthStore } from "@/store/auth";
-
-const WEATHER_API_URL = "http://localhost:5001";
-const WEATHER_API_VERSION = "v1";
+const WEATHER_API_URL = process.env.NEXT_PUBLIC_WEATHER_API_URL || "";
+const WEATHER_API_VERSION =
+  process.env.NEXT_PUBLIC_WEATHER_API_URL_VERSION || "v1";
 
 interface FetchOption {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -17,30 +16,68 @@ type WeatherApiResponse<TData> = {
   error?: string;
 };
 
+interface AuthState {
+  accessToken: string;
+  refreshToken: string;
+}
+
+interface StoredData {
+  state: AuthState;
+  version: number;
+}
+
+function removeSlashesSlice(str: string): string {
+  if (str.startsWith("/")) str = str.slice(1);
+  if (str.endsWith("/")) str = str.slice(0, -1);
+  return str;
+}
+
 async function protectedFetch<TData>(path: string, options?: FetchOption) {
-  const accessToken = useAuthStore((state) => state.accessToken);
-  const fullUrl = `${WEATHER_API_URL}/${WEATHER_API_VERSION}/${path}`;
-  const response = await fetch(fullUrl, {
-    method: options?.method || "GET",
-    body: options?.body ? JSON.stringify(options?.body) : undefined,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-      ...options?.headers,
-    },
-  });
-  const responseBody: WeatherApiResponse<TData> = await response.json();
-  if (!response.ok) {
-    if (responseBody.error) {
-      throw new Error(responseBody.error);
-    }
-    throw new Error("fetch failed unknown error");
+  const storedData = localStorage.getItem("auth");
+  if (!storedData) {
+    throw new Error("Auth not stored, please login");
   }
-  return responseBody;
+  const parsedData: StoredData = JSON.parse(storedData);
+  const token = parsedData.state.accessToken;
+  try {
+    return await publicFetch<TData>(removeSlashesSlice(path), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      ...options,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message === "jwt expired") {
+      const refreshToken = parsedData.state.refreshToken;
+      const tokenResponse = await publicFetch<{
+        access_token: string;
+        refresh_token: string;
+      }>("/auth/refresh", {
+        method: "POST",
+        body: {
+          refresh_token: refreshToken,
+        },
+      });
+
+      const newAccessToken = tokenResponse.json.data?.access_token || "";
+      const newRefreshToken = tokenResponse.json.data?.refresh_token || "";
+      parsedData.state.accessToken = newAccessToken;
+      parsedData.state.refreshToken = newRefreshToken;
+      localStorage.setItem("auth", JSON.stringify(parsedData));
+      return await publicFetch<TData>(path, {
+        headers: {
+          Authorization: `Bearer ${newAccessToken}`,
+        },
+        ...options,
+      });
+    } else {
+      throw error;
+    }
+  }
 }
 
 async function publicFetch<TData>(path: string, options?: FetchOption) {
-  const fullUrl = `${WEATHER_API_URL}/${WEATHER_API_VERSION}/${path}`;
+  const fullUrl = `${WEATHER_API_URL}/${WEATHER_API_VERSION}/${removeSlashesSlice(path)}`;
   const response = await fetch(fullUrl, {
     method: options?.method || "GET",
     body: options?.body ? JSON.stringify(options?.body) : undefined,
@@ -56,8 +93,9 @@ async function publicFetch<TData>(path: string, options?: FetchOption) {
     }
     throw new Error("fetch failed unknown error");
   }
-  return responseBody;
+  return { ok: response.ok, status: response.status, json: responseBody };
 }
+
 export {
   protectedFetch,
   publicFetch,
