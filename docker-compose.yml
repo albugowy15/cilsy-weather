@@ -9,6 +9,9 @@ services:
       - 3000:3000
     networks:
       - my_network
+    environment:
+      - NEXT_PUBLIC_WEATHER_API_URL=http://localhost:5001
+      - NEXT_PUBLIC_WEATHER_API_URL_VERSION=v1
 
   api:
     container_name: api
@@ -25,6 +28,12 @@ services:
       - mongo-express
       - redis
       - rabbitmq
+    environment:
+      - MONGODB_URL=mongodb://root:example@mongo:27017/weather?authSource=admin
+      - JWT_SECRET=somereallyhardsecret
+      - OPENWEATHERMAP_BASEURL=https://api.openweathermap.org/data/3.0/onecall
+      - OPENWEATHERMAP_APPID=2ea37f8fc37c462fd54dc6897b8ed647
+      - OPENWEATHERMAP_GEO_BASEURL=http://api.openweathermap.org/geo/1.0/direct
 
   mongo:
     image: mongo:8.0.1
@@ -63,12 +72,14 @@ services:
 
   redis:
     image: redis:7.4.1-alpine
+    hostname: redis
+    container_name: redis
     restart: always
     ports:
       - 6379:6379
     volumes:
       - redis_data:/data
-    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    # command: redis-server --save 20 1 --loglevel warning --requirepass redispass
     networks:
       - my_network
 

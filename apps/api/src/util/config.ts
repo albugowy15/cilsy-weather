@@ -8,6 +8,7 @@ const configSchema = z.object({
   OPENWEATHERMAP_BASEURL: z.string(),
   OPENWEATHERMAP_APPID: z.string(),
   OPENWEATHERMAP_GEO_BASEURL: z.string(),
+  REDIS_URL: z.string(),
 });
 
 export type Config = z.infer<typeof configSchema>;

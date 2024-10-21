@@ -20,8 +20,18 @@ import {
 } from "../util/token";
 import { CountryRepositoryImpl } from "../repository/country-repository";
 import { WeatherUseCaseImpl } from "../usecase/weather-usecase";
+import {
+  RedisClientType,
+  RedisFunctions,
+  RedisModules,
+  RedisScripts,
+} from "@redis/client";
+import { cacheRedis } from "../service/redis";
 
-export function setupLocationRoutes(config: Config): Router {
+export function setupLocationRoutes(
+  config: Config,
+  redisClient: RedisClientType<RedisModules, RedisFunctions, RedisScripts>,
+): Router {
   const routes = express.Router();
   const locationRepository = new LocationRepositoryImpl();
   const countryRepository = new CountryRepositoryImpl();
@@ -34,10 +44,9 @@ export function setupLocationRoutes(config: Config): Router {
 
   routes.get(
     "/countries",
-    (req: Request, res: Response, next: NextFunction) => {
-      locationUseCase
-        .findAllCountries()
-        .then((countries) => res.status(200).json(successRes(countries)))
+    async (req: Request, res: Response, next: NextFunction) => {
+      cacheRedis(req, redisClient, () => locationUseCase.findAllCountries())
+        .then((response) => res.status(200).json(successRes(response)))
         .catch((err) => next(err));
     },
   );
@@ -58,9 +67,8 @@ export function setupLocationRoutes(config: Config): Router {
     (req: Request, res: Response, next: NextFunction) => {
       const token = getTokenFromHeader(req);
       const payload = verifyJWTToken(token, config.JWT_SECRET) as TokenPayload;
-      locationUseCase
-        .findAll(payload.id)
-        .then((result) => res.status(200).json(successRes(result)))
+      cacheRedis(req, redisClient, () => locationUseCase.findAll(payload.id))
+        .then((response) => res.status(200).json(successRes(response)))
         .catch((err) => next(err));
     },
   );
@@ -74,11 +82,10 @@ export function setupLocationRoutes(config: Config): Router {
       }
       const token = getTokenFromHeader(req);
       const payload = verifyJWTToken(token, config.JWT_SECRET) as TokenPayload;
-      locationUseCase
-        .findById(paramLocationId, payload.id)
-        .then((result) => {
-          res.status(200).json(successRes(result));
-        })
+      cacheRedis(req, redisClient, () =>
+        locationUseCase.findById(paramLocationId, payload.id),
+      )
+        .then((result) => res.status(200).json(successRes(result)))
         .catch((err) => next(err));
     },
   );

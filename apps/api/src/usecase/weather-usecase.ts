@@ -7,6 +7,7 @@ import {
 } from "../schemas/weather-schema";
 import { Config } from "../util/config";
 import { AppError } from "../util/error";
+import { Types } from "mongoose";
 
 interface WeatherUseCase {
   fetchByLocation(
@@ -35,6 +36,9 @@ class WeatherUseCaseImpl implements WeatherUseCase {
     locationId: string,
     userId: string,
   ): Promise<WeatherDocument | null> {
+    if (!Types.ObjectId.isValid(locationId)) {
+      throw new AppError(400, `${locationId} is not valid ObjectId`);
+    }
     const prevWeatherData = await Weather.findOne({ location_id: locationId });
     if (prevWeatherData) {
       return prevWeatherData;
@@ -57,6 +61,9 @@ class WeatherUseCaseImpl implements WeatherUseCase {
     return result;
   }
   async refreshByLocation(locationId: string, userId: string): Promise<void> {
+    if (!Types.ObjectId.isValid(locationId)) {
+      throw new AppError(400, `${locationId} is not valid ObjectId`);
+    }
     const location = await this.locationRepository.findOne({
       _id: locationId,
       user_id: userId,

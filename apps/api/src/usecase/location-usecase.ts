@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { CountryRepository } from "../repository/country-repository";
 import { LocationRepository } from "../repository/location-repository";
 import { CountryDocument } from "../schemas/country-schema";
@@ -69,6 +70,9 @@ export class LocationUseCaseImpl implements LocationUseCase {
   }
 
   async findById(id: string, userId: string): Promise<LocationDocument | null> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new AppError(400, `${id} is not valid ObjectId`);
+    }
     return await this.locationRepository.findOne({
       _id: id,
       user_id: userId,
@@ -76,6 +80,9 @@ export class LocationUseCaseImpl implements LocationUseCase {
   }
 
   async delete(id: string, userId: string): Promise<void> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new AppError(400, `${id} is not valid ObjectId`);
+    }
     // check found
     const found = await this.locationRepository.findOne({
       _id: id,

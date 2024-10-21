@@ -11,13 +11,15 @@ import { authorize } from "./middleware/auth";
 import setupAuthRoutes from "./routes/auth";
 import { setupLocationRoutes } from "./routes/location";
 import { errorRes } from "./util/http";
+import { createRedisClient } from "./service/redis";
 
 export const createServer = async (): Promise<Express> => {
   const app = express();
   const config = loadEnvConfig();
   await connectMongoDB(config.MONGODB_URL);
+  const redisClient = await createRedisClient(config);
   const authRoutes = setupAuthRoutes(config);
-  const locationRoutes = setupLocationRoutes(config);
+  const locationRoutes = setupLocationRoutes(config, redisClient);
 
   app
     .use(compression())

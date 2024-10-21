@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import { type Request } from "express";
 import { AppError } from "./error";
+import { Types } from "mongoose";
 
 const HEADER_KEY = "Authorization";
 const AUTH_TOKEN_TYPE = "Bearer";
@@ -20,7 +21,10 @@ export function createJWTToken(
 }
 
 export function verifyJWTToken(token: string, secret: string) {
-  const decodedToken = jwt.verify(token, secret);
+  const decodedToken = jwt.verify(token, secret) as TokenPayload;
+  if (!Types.ObjectId.isValid(decodedToken.id)) {
+    throw new AppError(400, `${decodedToken.id} is not valid ObjectId`);
+  }
   return decodedToken;
 }
 
