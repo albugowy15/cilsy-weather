@@ -7,6 +7,7 @@ import LoadingSpin from "@/components/loading-spin";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth";
 import { LocationCard } from "./_components/location-card";
+import { RefreshWeatherDialog } from "./_components/refresh-weather-dialog";
 
 export type LocationQueryResponseData = {
   _id: string;
@@ -38,7 +39,10 @@ export default function LocationPage() {
             Manage your favorite weather locations
           </p>
         </div>
-        <AddLocationDialog />
+        <div className="flex flex-row gap-2 items-center">
+          <AddLocationDialog />
+          <RefreshWeatherDialog />
+        </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {locations.map((location) => (

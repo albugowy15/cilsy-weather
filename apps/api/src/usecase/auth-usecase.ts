@@ -1,21 +1,21 @@
 import { UserRepository } from "../repository/user-repository";
 import {
-  SignUpSchema,
-  SignInSchema,
+  SignUpRequestSchema,
+  SignInRequestSchema,
+  RefreshTokenRequestSchema,
   SignInResponse,
-  RefreshTokenSchema,
   RefreshTokenResponse,
-} from "../schemas/auth-schema";
+} from "@repo/types/request";
 import { AppError } from "../util/error";
 import { createJWTToken, TokenPayload } from "../util/token";
 import bcrypt from "bcryptjs";
 import jwt, { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 
 interface AuthUseCase {
-  signUp(req: SignUpSchema): Promise<void>;
-  signIn(req: SignInSchema, jwtSecret: string): Promise<SignInResponse>;
+  signUp(req: SignUpRequestSchema): Promise<void>;
+  signIn(req: SignUpRequestSchema, jwtSecret: string): Promise<SignInResponse>;
   refreshToken(
-    req: RefreshTokenSchema,
+    req: RefreshTokenRequestSchema,
     jwtSecret: string,
   ): Promise<RefreshTokenResponse>;
 }
@@ -26,7 +26,7 @@ class AuthUseCaseImpl implements AuthUseCase {
     this.userRepository = userRepository;
   }
 
-  async signUp(req: SignUpSchema): Promise<void> {
+  async signUp(req: SignUpRequestSchema): Promise<void> {
     const otherUser = await this.userRepository.findOneByEmail(req.email);
     if (otherUser) {
       throw new AppError(400, "email has been registered");
@@ -40,7 +40,10 @@ class AuthUseCaseImpl implements AuthUseCase {
     });
   }
 
-  async signIn(req: SignInSchema, jwtSecret: string): Promise<SignInResponse> {
+  async signIn(
+    req: SignInRequestSchema,
+    jwtSecret: string,
+  ): Promise<SignInResponse> {
     const user = await this.userRepository.findOneByEmail(req.email);
     if (!user) {
       throw new AppError(400, "email is wrong");
@@ -66,7 +69,7 @@ class AuthUseCaseImpl implements AuthUseCase {
   }
 
   async refreshToken(
-    req: RefreshTokenSchema,
+    req: RefreshTokenRequestSchema,
     jwtSecret: string,
   ): Promise<RefreshTokenResponse> {
     let decodedToken: null | jwt.JwtPayload | string;

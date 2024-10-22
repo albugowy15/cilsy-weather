@@ -10,6 +10,14 @@ const nextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${process.env.WEATHER_API_URL || "http://localhost:5001/v1"}/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

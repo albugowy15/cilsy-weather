@@ -1,4 +1,4 @@
-import { User, UserDocument, UserModel } from "../schemas/user-schema";
+import { User, UserDocument, UserModel } from "@repo/types/mongo";
 
 interface UserRepository {
   findOneById(userID: string): Promise<UserDocument | null>;

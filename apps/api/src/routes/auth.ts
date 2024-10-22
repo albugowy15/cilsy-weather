@@ -3,14 +3,14 @@ import { Router } from "express";
 import { UserRepositoryImpl } from "../repository/user-repository";
 import { AuthUseCaseImpl } from "../usecase/auth-usecase";
 import {
-  signInSchema,
-  signUpSchema,
-  SignUpRequest,
-  SignInRequest,
-  RefreshTokenRequest,
-} from "../schemas/auth-schema";
+  signInRequestSchema,
+  signUpRequestSchema,
+  SignInRequestSchema,
+  SignUpRequestSchema,
+  RefreshTokenRequestSchema,
+} from "@repo/types/request";
 import { zodValidation } from "../middleware/zod-validator";
-import { successRes } from "../util/http";
+import { successRes, TypedRequest } from "../util/http";
 import { Config } from "../util/config";
 
 function setupAuthRoutes(config: Config) {
@@ -20,8 +20,12 @@ function setupAuthRoutes(config: Config) {
 
   authRoutes.post(
     "/auth/signup",
-    zodValidation(signUpSchema),
-    (req: SignUpRequest, res: Response, next: NextFunction) => {
+    zodValidation(signUpRequestSchema),
+    (
+      req: TypedRequest<SignUpRequestSchema>,
+      res: Response,
+      next: NextFunction,
+    ) => {
       authUseCase
         .signUp(req.body)
         .then(() => {
@@ -32,8 +36,12 @@ function setupAuthRoutes(config: Config) {
   );
   authRoutes.post(
     "/auth/signin",
-    zodValidation(signInSchema),
-    (req: SignInRequest, res: Response, next: NextFunction) => {
+    zodValidation(signInRequestSchema),
+    (
+      req: TypedRequest<SignInRequestSchema>,
+      res: Response,
+      next: NextFunction,
+    ) => {
       authUseCase
         .signIn(req.body, config.JWT_SECRET)
         .then((result) => {
@@ -44,7 +52,11 @@ function setupAuthRoutes(config: Config) {
   );
   authRoutes.post(
     "/auth/refresh",
-    (req: RefreshTokenRequest, res: Response, next: NextFunction) => {
+    (
+      req: TypedRequest<RefreshTokenRequestSchema>,
+      res: Response,
+      next: NextFunction,
+    ) => {
       authUseCase
         .refreshToken(req.body, config.JWT_SECRET)
         .then((result) => {

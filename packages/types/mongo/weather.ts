@@ -1,7 +1,7 @@
 import { HydratedDocument, model, Schema } from "mongoose";
 
 // region: repository
-interface Temperature {
+export interface Temperature {
   day?: number;
   min?: number;
   max?: number;
@@ -18,20 +18,20 @@ const temperatureSchema = new Schema<Temperature>({
   morn: { type: Number, required: false },
 });
 
-interface WeatherDetails {
+export interface WeatherDetails {
   id: number;
   main: string;
   description: string;
   icon: string;
 }
-const weatherDetailsSchema = new Schema<WeatherDetails>({
+export const weatherDetailsSchema = new Schema<WeatherDetails>({
   id: { type: Number, required: true },
   main: { type: String, required: true },
   description: { type: String, required: true },
   icon: { type: String, required: true },
 });
 
-interface BaseWeatherCondition {
+export interface BaseWeatherCondition {
   dt: number;
   pressure: number;
   humidity: number;
@@ -40,11 +40,11 @@ interface BaseWeatherCondition {
   weather: WeatherDetails[];
 }
 
-interface CurrentWeather extends BaseWeatherCondition {
+export interface CurrentWeather extends BaseWeatherCondition {
   temp: number;
   feels_like: number;
 }
-const currentWeatherSchema = new Schema<CurrentWeather>({
+export const currentWeatherSchema = new Schema<CurrentWeather>({
   dt: { type: Number, required: true },
   pressure: { type: Number, required: true },
   humidity: { type: Number, required: true },
@@ -55,12 +55,12 @@ const currentWeatherSchema = new Schema<CurrentWeather>({
   feels_like: { type: Number, required: true },
 });
 
-interface DailyWeather extends BaseWeatherCondition {
+export interface DailyWeather extends BaseWeatherCondition {
   summary: string;
   temp: Temperature;
   feels_like: Temperature;
 }
-const dailyWeatherSchema = new Schema<DailyWeather>({
+export const dailyWeatherSchema = new Schema<DailyWeather>({
   dt: { type: Number, required: true },
   pressure: { type: Number, required: true },
   humidity: { type: Number, required: true },
@@ -88,7 +88,3 @@ export const weatherSchema = new Schema<WeatherModel>({
 });
 export const Weather = model<WeatherModel>("weathers", weatherSchema);
 export type WeatherDocument = HydratedDocument<WeatherModel>;
-// endregion
-
-// region: usecase
-// endregion

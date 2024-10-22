@@ -1,17 +1,14 @@
 import { Types } from "mongoose";
 import { CountryRepository } from "../repository/country-repository";
 import { LocationRepository } from "../repository/location-repository";
-import { CountryDocument } from "../schemas/country-schema";
-import {
-  LocationDocument,
-  SaveLocationSchema,
-} from "../schemas/location-schema";
+import { CountryDocument, LocationDocument } from "@repo/types/mongo";
+import { SaveLocationRequestSchema } from "@repo/types/request";
 import { searchLocation } from "../service/geoapi";
 import { Config } from "../util/config";
 import { AppError } from "../util/error";
 
 export interface LocationUseCase {
-  save(req: SaveLocationSchema, user_id: string): Promise<void>;
+  save(req: SaveLocationRequestSchema, user_id: string): Promise<void>;
   findAll(userId: string): Promise<LocationDocument[] | null>;
   findAllCountries(): Promise<CountryDocument[] | null>;
   findById(id: string, userId: string): Promise<LocationDocument | null>;
@@ -32,7 +29,7 @@ export class LocationUseCaseImpl implements LocationUseCase {
     this.countryRepository = countryRepository;
   }
 
-  async save(req: SaveLocationSchema, user_id: string): Promise<void> {
+  async save(req: SaveLocationRequestSchema, user_id: string): Promise<void> {
     const locations = await searchLocation(
       this.config.OPENWEATHERMAP_GEO_BASEURL,
       req.country_code,
@@ -69,14 +66,18 @@ export class LocationUseCaseImpl implements LocationUseCase {
     return locations || [];
   }
 
-  async findById(id: string, userId: string): Promise<LocationDocument | null> {
+  async findById(id: string, userId: string): Promise<LocationDocument> {
     if (!Types.ObjectId.isValid(id)) {
       throw new AppError(400, `${id} is not valid ObjectId`);
     }
-    return await this.locationRepository.findOne({
+    const location = await this.locationRepository.findOne({
       _id: id,
       user_id: userId,
     });
+    if (!location) {
+      throw new AppError(400, "Location not found");
+    }
+    return location;
   }
 
   async delete(id: string, userId: string): Promise<void> {

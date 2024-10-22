@@ -15,7 +15,7 @@ interface ToastMutationOption {
 const useToastMutation = <TBody>(path: string, opts?: ToastMutationOption) => {
   const method = opts?.method || "POST";
   const mutation = useMutation({
-    mutationFn: async (body: TBody) =>
+    mutationFn: async (body?: TBody) =>
       await protectedFetch(path, { method: method, body: body }),
     onSuccess() {
       toast.success(opts?.success || "Success");

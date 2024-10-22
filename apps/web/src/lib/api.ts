@@ -1,9 +1,5 @@
 "use client";
 
-const WEATHER_API_URL = process.env.NEXT_PUBLIC_WEATHER_API_URL || "";
-const WEATHER_API_VERSION =
-  process.env.NEXT_PUBLIC_WEATHER_API_URL_VERSION || "v1";
-
 interface FetchOption {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: unknown;
@@ -40,7 +36,7 @@ async function protectedFetch<TData>(path: string, options?: FetchOption) {
   const parsedData: StoredData = JSON.parse(storedData);
   const token = parsedData.state.accessToken;
   try {
-    return await publicFetch<TData>(removeSlashesSlice(path), {
+    return await publicFetch<TData>(path, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -77,8 +73,7 @@ async function protectedFetch<TData>(path: string, options?: FetchOption) {
 }
 
 async function publicFetch<TData>(path: string, options?: FetchOption) {
-  const fullUrl = `${WEATHER_API_URL}/${WEATHER_API_VERSION}/${removeSlashesSlice(path)}`;
-  const response = await fetch(fullUrl, {
+  const response = await fetch("/api/" + removeSlashesSlice(path), {
     method: options?.method || "GET",
     body: options?.body ? JSON.stringify(options?.body) : undefined,
     headers: {

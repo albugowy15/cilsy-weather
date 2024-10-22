@@ -61,7 +61,7 @@ export default function WeatherInfo(props: WeatherInfoProps) {
     queryKey: ["weather", props.location.id],
     queryFn: async () =>
       await protectedFetch<WeatherResponseData>(
-        `/locations/${props.location.id}/weather`,
+        `/weathers/location/${props.location.id}`,
       ),
   });
 
@@ -69,7 +69,7 @@ export default function WeatherInfo(props: WeatherInfoProps) {
 
   const refreshWeatherMutation = useMutation({
     mutationFn: async (locationId: string) =>
-      await protectedFetch(`/locations/${locationId}/weather/refresh`, {
+      await protectedFetch(`/weathers/location/${locationId}/refresh`, {
         method: "POST",
       }),
     onSuccess() {

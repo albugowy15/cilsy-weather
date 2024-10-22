@@ -1,6 +1,5 @@
 import { HydratedDocument, model, Schema } from "mongoose";
 
-// region: repository
 export interface CountryModel {
   name: string;
   alpha_2: string;
@@ -11,4 +10,3 @@ export const countrySchema = new Schema<CountryModel>({
 });
 export const Country = model<CountryModel>("countries", countrySchema);
 export type CountryDocument = HydratedDocument<CountryModel>;
-// endregion

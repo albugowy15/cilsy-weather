@@ -1,5 +1,4 @@
 import { createServer } from "./server";
-// import "dotenv/config";
 import logger from "./util/logger";
 
 const port = process.env.PORT || 5001;
@@ -9,4 +8,7 @@ createServer()
       logger.info(`api running on ${port}`);
     });
   })
-  .catch((err) => logger.error(err));
+  .catch((err) => {
+    logger.error(err);
+    process.exit(1);
+  });

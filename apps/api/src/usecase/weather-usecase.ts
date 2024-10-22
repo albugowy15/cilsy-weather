@@ -1,13 +1,11 @@
 import axios from "axios";
 import { LocationRepository } from "../repository/location-repository";
-import {
-  Weather,
-  WeatherDocument,
-  WeatherModel,
-} from "../schemas/weather-schema";
+import { Weather, WeatherDocument, WeatherModel } from "@repo/types/mongo";
 import { Config } from "../util/config";
 import { AppError } from "../util/error";
 import { Types } from "mongoose";
+import { Channel } from "amqplib";
+import { UserRepository } from "../repository/user-repository";
 
 interface WeatherUseCase {
   fetchByLocation(
@@ -15,17 +13,29 @@ interface WeatherUseCase {
     userId: string,
   ): Promise<WeatherDocument | null>;
   refreshByLocation(locationId: string, userId: string): Promise<void>;
+  refreshByUser(userId: string): Promise<void>;
 }
 
 type GetWeatherResponseBody = Omit<WeatherModel, "location_id">;
 
 class WeatherUseCaseImpl implements WeatherUseCase {
+  private userRepository: UserRepository;
   private locationRepository: LocationRepository;
   private config: Config;
-  constructor(config: Config, locationRepository: LocationRepository) {
+  private queueChannel: Channel;
+
+  constructor(
+    config: Config,
+    queueChannel: Channel,
+    locationRepository: LocationRepository,
+    userRepository: UserRepository,
+  ) {
     this.config = config;
     this.locationRepository = locationRepository;
+    this.queueChannel = queueChannel;
+    this.userRepository = userRepository;
   }
+
   private async fetchLatestWeather(lon: number, lat: number) {
     const fetchWeatherResult = await axios.get<GetWeatherResponseBody>(
       `${this.config.OPENWEATHERMAP_BASEURL}?lat=${lat}&lon=${lon}&exclude=hourly&appid=${this.config.OPENWEATHERMAP_APPID}`,
@@ -88,6 +98,27 @@ class WeatherUseCaseImpl implements WeatherUseCase {
         { location_id: location._id, ...fetchWeatherData },
       );
       return;
+    }
+  }
+
+  async refreshByUser(userId: string): Promise<void> {
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new AppError(400, "invalid user_id not ObjectId");
+    }
+    const user = await this.userRepository.findOneById(userId);
+    if (!user) {
+      throw new AppError(400, "user not found");
+    }
+    const messagePayload = {
+      user_id: user._id,
+    };
+    const messageBuffer = Buffer.from(JSON.stringify(messagePayload));
+    const isSended = this.queueChannel.sendToQueue(
+      this.config.REFRESH_WEATHER_QUEUE,
+      messageBuffer,
+    );
+    if (!isSended) {
+      throw new AppError(500, "Failed to send message to queue");
     }
   }
 }

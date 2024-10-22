@@ -4,11 +4,8 @@ import logger from "./logger";
 
 const configSchema = z.object({
   MONGODB_URL: z.string(),
-  JWT_SECRET: z.string(),
   OPENWEATHERMAP_BASEURL: z.string(),
   OPENWEATHERMAP_APPID: z.string(),
-  OPENWEATHERMAP_GEO_BASEURL: z.string(),
-  REDIS_URL: z.string(),
   REFRESH_WEATHER_QUEUE: z.string(),
   RABBITMQ_URL: z.string(),
 });

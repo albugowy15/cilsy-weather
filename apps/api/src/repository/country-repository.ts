@@ -1,9 +1,5 @@
 import { RootFilterQuery } from "mongoose";
-import {
-  Country,
-  CountryDocument,
-  CountryModel,
-} from "../schemas/country-schema";
+import { Country, CountryDocument, CountryModel } from "@repo/types/mongo";
 
 interface CountryRepository {
   find(

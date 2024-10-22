@@ -3,8 +3,8 @@ import {
   Location,
   LocationDocument,
   LocationModel,
-} from "../schemas/location-schema";
-import { Weather } from "../schemas/weather-schema";
+  Weather,
+} from "@repo/types/mongo";
 
 interface LocationRepository {
   find(

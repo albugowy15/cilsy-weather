@@ -1,7 +1,5 @@
 import { z } from "zod";
-import { TypedRequest } from "../util/http";
 
-// region: request
 const emailSchema = z
   .string({
     required_error: "Email is required",
@@ -10,7 +8,6 @@ const emailSchema = z
   .email({ message: "Email is not valid" })
   .min(1, { message: "Email is required" })
   .max(255, { message: "Email maximum 255 characters length" });
-
 const passwordSchema = z
   .string({
     required_error: "Password is required",
@@ -19,7 +16,7 @@ const passwordSchema = z
   .min(6, { message: "Password minimum 6 characters length" })
   .max(32, { message: "Password maximum 32 characters length" });
 
-export const signUpSchema = z.object({
+export const signUpRequestSchema = z.object({
   fullname: z
     .string({
       required_error: "Fullname is required",
@@ -30,19 +27,19 @@ export const signUpSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
 });
+export type SignUpRequestSchema = z.infer<typeof signUpRequestSchema>;
 
-export type SignUpSchema = z.infer<typeof signUpSchema>;
-export type SignUpRequest = TypedRequest<SignUpSchema>;
-
-export const signInSchema = z.object({
+export const signInRequestSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
 });
+export type SignInRequestSchema = z.infer<typeof signInRequestSchema>;
+export type SignInResponse = {
+  access_token: string;
+  refresh_token: string;
+};
 
-export type SignInSchema = z.infer<typeof signInSchema>;
-export type SignInRequest = TypedRequest<SignInSchema>;
-
-export const refreshTokenSchema = z.object({
+export const refreshTokenRequestSchema = z.object({
   refresh_token: z
     .string({
       required_error: "refresh_token is required",
@@ -50,18 +47,10 @@ export const refreshTokenSchema = z.object({
     })
     .min(1, { message: "refresh_token should be string" }),
 });
-export type RefreshTokenSchema = z.infer<typeof refreshTokenSchema>;
-export type RefreshTokenRequest = TypedRequest<RefreshTokenSchema>;
-// endregion
-
-// region: response
-export type SignInResponse = {
-  access_token: string;
-  refresh_token: string;
-};
-
+export type RefreshTokenRequestSchema = z.infer<
+  typeof refreshTokenRequestSchema
+>;
 export type RefreshTokenResponse = {
   access_token: string;
   refresh_token: string;
 };
-// endregion
