@@ -19,21 +19,15 @@ import {
   verifyJWTToken,
 } from "../util/token";
 import { CountryRepositoryImpl } from "../repository/country-repository";
-import {
-  RedisClientType,
-  RedisFunctions,
-  RedisModules,
-  RedisScripts,
-} from "@redis/client";
-import { cacheRedis } from "../service/redis";
+import { RedisClientType } from "@redis/client";
 
 export function setupLocationRoutes(
   config: Config,
-  redisClient: RedisClientType<RedisModules, RedisFunctions, RedisScripts>,
+  redisClient: RedisClientType,
 ): Router {
   const routes = express.Router();
   const locationRepository = new LocationRepositoryImpl();
-  const countryRepository = new CountryRepositoryImpl();
+  const countryRepository = new CountryRepositoryImpl(redisClient);
   const locationUseCase = new LocationUseCaseImpl(
     config,
     locationRepository,
@@ -43,7 +37,8 @@ export function setupLocationRoutes(
   routes.get(
     "/countries",
     async (req: Request, res: Response, next: NextFunction) => {
-      cacheRedis(req, redisClient, () => locationUseCase.findAllCountries())
+      locationUseCase
+        .findAllCountries()
         .then((response) => res.status(200).json(successRes(response)))
         .catch((err) => next(err));
     },

@@ -8,6 +8,7 @@ const configSchema = z.object({
   OPENWEATHERMAP_APPID: z.string(),
   REFRESH_WEATHER_QUEUE: z.string(),
   RABBITMQ_URL: z.string(),
+  REDIS_URL: z.string(),
 });
 
 export type Config = z.infer<typeof configSchema>;

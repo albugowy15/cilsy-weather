@@ -3,8 +3,9 @@ import mongoose from "mongoose";
 import logger from "./logger";
 import { Config, loadEnvConfig } from "./config";
 import { handleRefreshWeatherNotification } from "./handler/email";
+import { createClient, RedisClientType } from "@redis/client";
 
-function startRabbitMqConsumer(config: Config) {
+function startRabbitMqConsumer(config: Config, redisClient: RedisClientType) {
   amqp.connect(config.RABBITMQ_URL, function (err, connection) {
     if (err) {
       logger.error(err);
@@ -17,8 +18,8 @@ function startRabbitMqConsumer(config: Config) {
       channel.consume(
         config.REFRESH_WEATHER_QUEUE,
         (msg) =>
-          handleRefreshWeatherNotification(config, msg).catch((err: Error) =>
-            logger.error(err.message),
+          handleRefreshWeatherNotification(config, redisClient, msg).catch(
+            (err: Error) => logger.error(err.message),
           ),
         {
           noAck: true,
@@ -33,10 +34,17 @@ async function startMongoDB(mongoUrl: string) {
   logger.info("connected to database");
 }
 
+async function createRedisClient(redisUrl: string) {
+  const client = createClient({ url: redisUrl });
+  await client.connect();
+  return client as RedisClientType;
+}
+
 async function startNotifcationService() {
   const config = loadEnvConfig();
   await startMongoDB(config.MONGODB_URL);
-  startRabbitMqConsumer(config);
+  const redisClient = await createRedisClient(config.REDIS_URL);
+  startRabbitMqConsumer(config, redisClient);
 }
 
 startNotifcationService()

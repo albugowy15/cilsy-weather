@@ -99,6 +99,6 @@ export class LocationUseCaseImpl implements LocationUseCase {
   }
 
   async findAllCountries(): Promise<CountryDocument[] | null> {
-    return await this.countryRepository.find();
+    return await this.countryRepository.findAll();
   }
 }

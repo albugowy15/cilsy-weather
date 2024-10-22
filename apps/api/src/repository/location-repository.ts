@@ -5,6 +5,7 @@ import {
   LocationModel,
   Weather,
 } from "@repo/types/mongo";
+import { RedisClientType } from "@redis/client";
 
 interface LocationRepository {
   find(

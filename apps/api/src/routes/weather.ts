@@ -15,19 +15,26 @@ import {
 import { WeatherUseCaseImpl } from "../usecase/weather-usecase";
 import { Channel } from "amqplib";
 import { UserRepositoryImpl } from "../repository/user-repository";
+import { WeatherRepositoryImpl } from "../repository/weather-repository";
+import { RedisClientType } from "@redis/client/dist/lib/client";
 
 export function setupWeatherRoutes(
   config: Config,
   queueChannel: Channel,
+  redisClient: RedisClientType,
 ): Router {
   const routes = express.Router();
   const locationRepository = new LocationRepositoryImpl();
   const userRepository = new UserRepositoryImpl();
-  const weatherUseCase = new WeatherUseCaseImpl(
+  const weatherRepository = new WeatherRepositoryImpl(
+    redisClient,
     config,
     queueChannel,
+  );
+  const weatherUseCase = new WeatherUseCaseImpl(
     locationRepository,
     userRepository,
+    weatherRepository,
   );
 
   routes.get(

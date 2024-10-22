@@ -1,11 +1,5 @@
 import { type Request } from "express";
-import {
-  createClient,
-  RedisClientType,
-  RedisFunctions,
-  RedisModules,
-  RedisScripts,
-} from "@redis/client";
+import { createClient, RedisClientType } from "@redis/client";
 import logger from "../util/logger";
 import { Config } from "../util/config";
 
@@ -14,12 +8,12 @@ export async function createRedisClient(config: Config) {
     url: config.REDIS_URL,
   });
   await redisClient.connect();
-  return redisClient;
+  return redisClient as RedisClientType;
 }
 
 export async function cacheRedis(
   req: Request,
-  redisClient: RedisClientType<RedisModules, RedisFunctions, RedisScripts>,
+  redisClient: RedisClientType,
   ucFn: () => Promise<unknown>,
 ) {
   const requestFullPath = req.originalUrl;

@@ -5,6 +5,7 @@ import { z } from "zod";
 import logger from "../logger";
 import { Location, User, Weather, WeatherModel } from "@repo/types/mongo";
 import { Types } from "mongoose";
+import { RedisClientType } from "@redis/client";
 
 type GetWeatherResponseBody = Omit<WeatherModel, "location_id">;
 
@@ -31,6 +32,7 @@ const messagePayloadSchema = z.object({
 
 async function handleRefreshWeatherNotification(
   config: Config,
+  redisClient: RedisClientType,
   msg: amqp.Message | null,
 ) {
   if (!msg) {
@@ -58,6 +60,8 @@ async function handleRefreshWeatherNotification(
 
   // perform refresh data
   for (const location of userLocations) {
+    const key = `weather:${location._id.toString()}`;
+    await redisClient.del(key);
     const weather = await Weather.findOne({
       location_id: location._id,
     });
@@ -80,9 +84,13 @@ async function handleRefreshWeatherNotification(
 
   // send notifcation
   // perform actual sent. To fully implement email notifcation service we need to configure email smtp and custom email domains.
-  logger.info(
-    `Email notifcation sended to user: ${user.fullname} with email address: ${user.email}`,
-  );
+  logger.info(`Preparing to send email to ${user.fullname}...`);
+  setTimeout(() => {
+    // Perform the actual "sending" (here we just log for simulation)
+    logger.info(
+      `Email notification sent to user: ${user.fullname} with email address: ${user.email}`,
+    );
+  }, 60000);
 }
 
 export { handleRefreshWeatherNotification };

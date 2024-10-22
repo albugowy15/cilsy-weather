@@ -32,7 +32,7 @@ export const createServer = async (): Promise<Express> => {
   // routes
   const authRoutes = setupAuthRoutes(config);
   const locationRoutes = setupLocationRoutes(config, redisClient);
-  const weatherRoutes = setupWeatherRoutes(config, rabbit.channel);
+  const weatherRoutes = setupWeatherRoutes(config, rabbit.channel, redisClient);
 
   app
     .use(compression())

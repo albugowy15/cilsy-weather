@@ -1,11 +1,9 @@
-import axios from "axios";
 import { LocationRepository } from "../repository/location-repository";
-import { Weather, WeatherDocument, WeatherModel } from "@repo/types/mongo";
-import { Config } from "../util/config";
+import { WeatherDocument } from "@repo/types/mongo";
 import { AppError } from "../util/error";
 import { Types } from "mongoose";
-import { Channel } from "amqplib";
 import { UserRepository } from "../repository/user-repository";
+import { WeatherRepository } from "../repository/weather-repository";
 
 interface WeatherUseCase {
   fetchByLocation(
@@ -16,32 +14,21 @@ interface WeatherUseCase {
   refreshByUser(userId: string): Promise<void>;
 }
 
-type GetWeatherResponseBody = Omit<WeatherModel, "location_id">;
-
 class WeatherUseCaseImpl implements WeatherUseCase {
   private userRepository: UserRepository;
   private locationRepository: LocationRepository;
-  private config: Config;
-  private queueChannel: Channel;
+  private weatherRepostory: WeatherRepository;
 
   constructor(
-    config: Config,
-    queueChannel: Channel,
     locationRepository: LocationRepository,
     userRepository: UserRepository,
+    weatherRepostory: WeatherRepository,
   ) {
-    this.config = config;
     this.locationRepository = locationRepository;
-    this.queueChannel = queueChannel;
     this.userRepository = userRepository;
+    this.weatherRepostory = weatherRepostory;
   }
 
-  private async fetchLatestWeather(lon: number, lat: number) {
-    const fetchWeatherResult = await axios.get<GetWeatherResponseBody>(
-      `${this.config.OPENWEATHERMAP_BASEURL}?lat=${lat}&lon=${lon}&exclude=hourly&appid=${this.config.OPENWEATHERMAP_APPID}`,
-    );
-    return fetchWeatherResult.data;
-  }
   async fetchByLocation(
     locationId: string,
     userId: string,
@@ -49,7 +36,7 @@ class WeatherUseCaseImpl implements WeatherUseCase {
     if (!Types.ObjectId.isValid(locationId)) {
       throw new AppError(400, `${locationId} is not valid ObjectId`);
     }
-    const prevWeatherData = await Weather.findOne({ location_id: locationId });
+    const prevWeatherData = this.weatherRepostory.findByLocationId(locationId);
     if (prevWeatherData) {
       return prevWeatherData;
     }
@@ -60,16 +47,17 @@ class WeatherUseCaseImpl implements WeatherUseCase {
     if (!location) {
       throw new AppError(400, "Location id not found");
     }
-    const fetchWeatherData = await this.fetchLatestWeather(
+    const fetchWeatherData = await this.weatherRepostory.fetchLatestWeather(
       location.lon,
       location.lat,
     );
-    const result = await Weather.create({
+    const result = this.weatherRepostory.create({
       location_id: locationId,
       ...fetchWeatherData,
     });
     return result;
   }
+
   async refreshByLocation(locationId: string, userId: string): Promise<void> {
     if (!Types.ObjectId.isValid(locationId)) {
       throw new AppError(400, `${locationId} is not valid ObjectId`);
@@ -81,21 +69,21 @@ class WeatherUseCaseImpl implements WeatherUseCase {
     if (!location) {
       throw new AppError(400, "Location id not found");
     }
-    const prevWeatherData = Weather.findOne({ location_id: location._id });
-    const fetchWeatherData = await this.fetchLatestWeather(
+    const prevWeatherData = this.weatherRepostory.findByLocationId(locationId);
+    const fetchWeatherData = await this.weatherRepostory.fetchLatestWeather(
       location.lon,
       location.lat,
     );
     if (!prevWeatherData) {
-      await Weather.create({
+      await this.weatherRepostory.create({
         location_id: locationId,
         ...fetchWeatherData,
       });
       return;
     } else {
-      await Weather.findOneAndReplace(
-        { location_id: location._id },
-        { location_id: location._id, ...fetchWeatherData },
+      await this.weatherRepostory.replaceByLocationId(
+        location._id,
+        fetchWeatherData,
       );
       return;
     }
@@ -112,11 +100,7 @@ class WeatherUseCaseImpl implements WeatherUseCase {
     const messagePayload = {
       user_id: user._id,
     };
-    const messageBuffer = Buffer.from(JSON.stringify(messagePayload));
-    const isSended = this.queueChannel.sendToQueue(
-      this.config.REFRESH_WEATHER_QUEUE,
-      messageBuffer,
-    );
+    const isSended = this.weatherRepostory.sendToQueue(messagePayload);
     if (!isSended) {
       throw new AppError(500, "Failed to send message to queue");
     }
