@@ -73,11 +73,11 @@ async function handleRefreshWeatherNotification(
     if (!weather) {
       await Weather.create({ location_id: location._id, ...latestWeatherData });
     } else {
+      await Weather.findOneAndReplace(
+        { location_id: location._id },
+        { location_id: location._id, ...latestWeatherData },
+      );
     }
-    await Weather.findOneAndReplace(
-      { location_id: location._id },
-      { location_id: location._id, ...latestWeatherData },
-    );
   }
 
   // send notifcation

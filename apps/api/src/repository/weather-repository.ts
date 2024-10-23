@@ -59,7 +59,7 @@ class WeatherRepositoryImpl implements WeatherRepository {
     const key = `weather:${locationId}`;
     const prevCachedDoc = await this.redisClient.get(key);
     if (prevCachedDoc) {
-      logger.info("cacne invalidate");
+      logger.info("cache invalidate");
       await this.redisClient.del(key);
     }
     await Weather.findOneAndReplace(
