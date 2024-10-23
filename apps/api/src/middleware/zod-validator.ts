@@ -5,7 +5,6 @@ import { AppError } from "../util/error";
 function zodValidation<T extends z.ZodTypeAny>(schema: T) {
   return function (req: Request, _res: Response, next: NextFunction) {
     const body = req.body;
-    console.log(body);
     const validationResult = schema.safeParse(body);
     if (!validationResult.success) {
       const errorMessage = validationResult.error?.errors[0].message;

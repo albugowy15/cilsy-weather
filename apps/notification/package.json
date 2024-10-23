@@ -8,8 +8,7 @@
     "build": "tsup",
     "lint": "eslint src",
     "clean": "rm -rf dist",
-    "typecheck": "tsc --noEmit",
-    "test": "jest --detectOpenHandles"
+    "typecheck": "tsc --noEmit"
   },
   "jest": {
     "preset": "@repo/jest-presets/node"

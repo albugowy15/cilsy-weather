@@ -9,9 +9,10 @@ services:
       - 3000:3000
     networks:
       - my_network
+    depends_on:
+      - api
     environment:
-      - NEXT_PUBLIC_WEATHER_API_URL=http://localhost:5001
-      - NEXT_PUBLIC_WEATHER_API_URL_VERSION=v1
+      - WEATHER_API_URL=http://api:5001/v1
 
   api:
     container_name: api
@@ -25,15 +26,35 @@ services:
       - my_network
     depends_on:
       - mongo
-      - mongo-express
       - redis
       - rabbitmq
     environment:
       - MONGODB_URL=mongodb://root:example@mongo:27017/weather?authSource=admin
       - JWT_SECRET=somereallyhardsecret
       - OPENWEATHERMAP_BASEURL=https://api.openweathermap.org/data/3.0/onecall
-      - OPENWEATHERMAP_APPID=2ea37f8fc37c462fd54dc6897b8ed647
+      - OPENWEATHERMAP_APPID=<your-key>
       - OPENWEATHERMAP_GEO_BASEURL=http://api.openweathermap.org/geo/1.0/direct
+      - REDIS_URL=redis://redis:6379
+      - REFRESH_WEATHER_QUEUE=refresh-weather-notification
+      - RABBITMQ_URL=amqp://user:password@rabbitmq:5672
+
+  notification:
+    container_name: notification
+    build:
+      context: .
+      dockerfile: ./apps/notification/Dockerfile
+    restart: always
+    networks:
+      - my_network
+    depends_on:
+      - mongo
+      - rabbitmq
+    environment:
+      - MONGODB_URL=mongodb://root:example@mongo:27017/weather?authSource=admin
+      - OPENWEATHERMAP_BASEURL=https://api.openweathermap.org/data/3.0/onecall
+      - OPENWEATHERMAP_APPID=<your-key>
+      - REFRESH_WEATHER_QUEUE=refresh-weather-notification
+      - RABBITMQ_URL=amqp://user:password@rabbitmq:5672
 
   mongo:
     image: mongo:8.0.1
