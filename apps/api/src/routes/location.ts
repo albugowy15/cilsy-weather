@@ -26,7 +26,7 @@ export function setupLocationRoutes(
   redisClient: RedisClientType,
 ): Router {
   const routes = express.Router();
-  const locationRepository = new LocationRepositoryImpl();
+  const locationRepository = new LocationRepositoryImpl(redisClient);
   const countryRepository = new CountryRepositoryImpl(redisClient);
   const locationUseCase = new LocationUseCaseImpl(
     config,

@@ -19,6 +19,10 @@ interface LocationRepository {
 }
 
 class LocationRepositoryImpl implements LocationRepository {
+  private redisClient: RedisClientType;
+  constructor(redisClient: RedisClientType) {
+    this.redisClient = redisClient;
+  }
   async find(
     params: RootFilterQuery<LocationModel>,
   ): Promise<LocationDocument[] | null> {
@@ -35,6 +39,8 @@ class LocationRepositoryImpl implements LocationRepository {
   async deleteOne(params: RootFilterQuery<LocationModel>): Promise<void> {
     const deletedLocation = await Location.findOneAndDelete(params);
     if (deletedLocation) {
+      const key = `weather:${deletedLocation._id}`;
+      await this.redisClient.del(key);
       await Weather.deleteOne({ location_id: deletedLocation._id });
     }
   }

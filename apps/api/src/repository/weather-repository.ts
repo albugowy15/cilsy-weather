@@ -4,6 +4,7 @@ import axios from "axios";
 import { Types } from "mongoose";
 import { Config } from "../util/config";
 import { Channel } from "amqplib";
+import logger from "../util/logger";
 
 interface WeatherRepository {
   findByLocationId(locationId: string): Promise<WeatherDocument | null>;
@@ -58,11 +59,12 @@ class WeatherRepositoryImpl implements WeatherRepository {
     const key = `weather:${locationId}`;
     const prevCachedDoc = await this.redisClient.get(key);
     if (prevCachedDoc) {
+      logger.info("cacne invalidate");
       await this.redisClient.del(key);
     }
     await Weather.findOneAndReplace(
       { location_id: locationId },
-      { location_id: locationId, replacement },
+      { location_id: locationId, ...replacement },
     );
   }
 

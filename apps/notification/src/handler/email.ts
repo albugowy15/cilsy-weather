@@ -62,23 +62,21 @@ async function handleRefreshWeatherNotification(
   for (const location of userLocations) {
     const key = `weather:${location._id.toString()}`;
     await redisClient.del(key);
-    const weather = await Weather.findOne({
-      location_id: location._id,
-    });
-    if (!weather) {
-      logger.error(
-        `weather document with location_id ${location._id} not found`,
-      );
-      return;
-    }
-    logger.info(`refresh weather document with id ${weather._id}`);
+    logger.info(`refresh weather document with location id ${location._id}`);
     const latestWeatherData = await fetchLatestWeather(config, {
       lon: location.lon,
       lat: location.lat,
     });
+    const weather = await Weather.findOne({
+      location_id: location._id,
+    });
+    if (!weather) {
+      await Weather.create({ location_id: location._id, ...latestWeatherData });
+    } else {
+    }
     await Weather.findOneAndReplace(
-      { _id: weather._id },
-      { location_id: weather.location_id, ...latestWeatherData },
+      { location_id: location._id },
+      { location_id: location._id, ...latestWeatherData },
     );
   }
 
@@ -90,7 +88,7 @@ async function handleRefreshWeatherNotification(
     logger.info(
       `Email notification sent to user: ${user.fullname} with email address: ${user.email}`,
     );
-  }, 60000);
+  }, 10000);
 }
 
 export { handleRefreshWeatherNotification };

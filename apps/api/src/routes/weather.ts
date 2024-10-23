@@ -24,7 +24,7 @@ export function setupWeatherRoutes(
   redisClient: RedisClientType,
 ): Router {
   const routes = express.Router();
-  const locationRepository = new LocationRepositoryImpl();
+  const locationRepository = new LocationRepositoryImpl(redisClient);
   const userRepository = new UserRepositoryImpl();
   const weatherRepository = new WeatherRepositoryImpl(
     redisClient,

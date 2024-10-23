@@ -8,8 +8,8 @@ import {
 } from "@repo/types/request";
 import { AppError } from "../util/error";
 import { createJWTToken, TokenPayload } from "../util/token";
-import bcrypt from "bcryptjs";
 import jwt, { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
+import { comparePassword, hashPassword } from "../util/crypto";
 
 interface AuthUseCase {
   signUp(req: SignUpRequestSchema): Promise<void>;
@@ -32,7 +32,7 @@ class AuthUseCaseImpl implements AuthUseCase {
       throw new AppError(400, "email has been registered");
     }
 
-    const hashedPassword = await bcrypt.hash(req.password, 12);
+    const hashedPassword = await hashPassword(req.password);
     await this.userRepository.create({
       password: hashedPassword,
       fullname: req.fullname,
@@ -48,7 +48,7 @@ class AuthUseCaseImpl implements AuthUseCase {
     if (!user) {
       throw new AppError(400, "email is wrong");
     }
-    const isPasswordMatch = await bcrypt.compare(req.password, user.password);
+    const isPasswordMatch = await comparePassword(req.password, user.password);
     if (!isPasswordMatch) {
       throw new AppError(400, "password not match");
     }

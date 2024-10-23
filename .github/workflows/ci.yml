@@ -4,17 +4,54 @@ on:
   push:
     branches: ["main"]
   pull_request:
-    types: [opened, synchronize]
+    branches: ["main"]
 
 jobs:
   build:
     name: Build and Test
-    timeout-minutes: 15
     runs-on: ubuntu-latest
     # To use Remote Caching, uncomment the next lines and follow the steps below.
     # env:
     #  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
     #  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
+    services:
+      redis:
+        image: redis:7.4.1
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+      rabbitmq:
+        image: rabbitmq:4.0.2
+        ports:
+          - 5672:5672
+        env:
+          RABBITMQ_DEFAULT_USER: user
+          RABBITMQ_DEFAULT_PASS: password
+        options: >-
+          --health-cmd "rabbitmqctl status"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      mongo:
+        image: mongo:8.0.1
+        env:
+          MONGO_INITDB_ROOT_USERNAME: root
+          MONGO_INITDB_ROOT_PASSWORD: example
+          MONGO_INITDB_DATABASE: weather
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "echo 'db.runCommand("ping").ok' | mongosh --quiet"
+          --health-interval 10s
+          --health-timeout 10s
+          --health-retries 10
 
     steps:
       - name: Check out code
@@ -47,5 +84,13 @@ jobs:
       - name: Build
         run: pnpm build
 
-      # - name: Test
-      #   run: pnpm test
+      - name: Seed mongo
+        run: |
+          cp ${{ github.workspace }}/apps/seeder/.env.ci ${{ github.workspace }}/apps/seeder/.env
+          pnpm seed
+
+      - name: Test API
+        run: |
+          echo "OPENWEATHERMAP_APPID=${{ secrets.OPENWEATHERMAP_APPID }}" >> ${{ github.workspace }}/apps/api/.env.ci
+          cp ${{ github.workspace }}/apps/api/.env.ci ${{ github.workspace }}/apps/api/.env
+          pnpm test --filter=api

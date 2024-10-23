@@ -36,7 +36,8 @@ class WeatherUseCaseImpl implements WeatherUseCase {
     if (!Types.ObjectId.isValid(locationId)) {
       throw new AppError(400, `${locationId} is not valid ObjectId`);
     }
-    const prevWeatherData = this.weatherRepostory.findByLocationId(locationId);
+    const prevWeatherData =
+      await this.weatherRepostory.findByLocationId(locationId);
     if (prevWeatherData) {
       return prevWeatherData;
     }

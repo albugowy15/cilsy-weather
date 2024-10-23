@@ -6,7 +6,7 @@ import { appErrorHandler } from "./util/error";
 import morgan from "morgan";
 import compression from "compression";
 import timeout from "connect-timeout";
-import { loadEnvConfig } from "./util/config";
+import { Config, loadEnvConfig } from "./util/config";
 import { authorize } from "./middleware/auth";
 import setupAuthRoutes from "./routes/auth";
 import { setupLocationRoutes } from "./routes/location";
@@ -14,20 +14,16 @@ import { errorRes } from "./util/http";
 import { createRedisClient } from "./service/redis";
 import { connectRabbitMq } from "./service/rabbitmq";
 import { setupWeatherRoutes } from "./routes/weather";
+import { RedisClientType } from "@redis/client";
+import { Channel, Connection } from "amqplib";
 
-export const createServer = async (): Promise<Express> => {
+export const createServer = (
+  config: Config,
+  redisClient: RedisClientType,
+  rabbit: { channel: Channel; connection: Connection },
+): Express => {
   const app = express();
   // env
-  const config = loadEnvConfig();
-
-  // mongodb
-  await connectMongoDB(config.MONGODB_URL);
-
-  // redis
-  const redisClient = await createRedisClient(config);
-
-  // rabbitmq
-  const rabbit = await connectRabbitMq(config);
 
   // routes
   const authRoutes = setupAuthRoutes(config);
